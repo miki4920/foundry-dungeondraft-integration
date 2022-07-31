@@ -12,7 +12,7 @@ function convertVectorIntoArray(vector, regex, scale=true) {
 }
 
 function drawWalls(walls) {
-    const regex = /([0-9]+).? /g
+    const regex = /([0-9]+\.?[0-9]*)[^(]? /g
     let numericalWalls = []
     for(let wallInfo of walls) {
         let wall = convertVectorIntoArray(wallInfo.points, regex)
@@ -33,11 +33,12 @@ function applyRotation(array, angle) {
 }
 
 function drawPortals(portals) {
-    const regex = /([0-9]+)[^(]? /g
+    const regex = /([0-9]+\.?[0-9]*)[^(]? /g
     let numericalPortals = []
     for(let portalInfo of portals) {
         let portal = convertVectorIntoArray(portalInfo.position, regex);
         let scale = convertVectorIntoArray(portalInfo.scale, regex, false)
+        console.log(scale)
         let rotation = [canvas.scene.dimensions.size, 0]
         rotation = applyRotation(rotation, portalInfo.rotation)
         rotation = [rotation[0] * scale[0], rotation[1] * scale[1]]
@@ -47,14 +48,20 @@ function drawPortals(portals) {
 }
 
 function drawLights(lights) {
-    const regex = /([0-9]+)[^(]? /g
+    const regex = /([0-9]+\.?[0-9]*)[^(]? /g
     let numericalLights = []
     for(let lightInfo of lights) {
         let light = convertVectorIntoArray(lightInfo.position, regex)
-        numericalLights.push({c: light})
+        let dimLight = lightInfo.range*canvas.scene.dimensions.distance
+        let brightLight = dimLight*(lightInfo.intensity/3)
+        let colorLight = "#" + lightInfo.color.substring(2, lightInfo.color.length)
+        numericalLights.push({x: light[0], y: light[1],
+            config: {dim: dimLight, bright: brightLight,
+                color: colorLight, contrast: 1}})
 
     }
-    canvas.scene.createEmbeddedDocuments("Light", numericalLights)
+    console.log(numericalLights)
+    canvas.scene.createEmbeddedDocuments("AmbientLight", numericalLights)
 }
 
 function drawData(json) {
