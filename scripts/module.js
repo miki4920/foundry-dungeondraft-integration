@@ -1,3 +1,5 @@
+const regex = /(-?[0-9]+\.?[0-9]*)[^(]? /g
+
 function convertVectorIntoArray(vector, regex, scale=true) {
     vector = [...vector.matchAll(regex)]
     let array = []
@@ -12,7 +14,6 @@ function convertVectorIntoArray(vector, regex, scale=true) {
 }
 
 function drawWalls(walls) {
-    const regex = /([0-9]+\.?[0-9]*)[^(]? /g
     let numericalWalls = []
     for(let wallInfo of walls) {
         let wall = convertVectorIntoArray(wallInfo.points, regex)
@@ -33,12 +34,10 @@ function applyRotation(array, angle) {
 }
 
 function drawPortals(portals) {
-    const regex = /([0-9]+\.?[0-9]*)[^(]? /g
     let numericalPortals = []
     for(let portalInfo of portals) {
         let portal = convertVectorIntoArray(portalInfo.position, regex);
         let scale = convertVectorIntoArray(portalInfo.scale, regex, false)
-        console.log(scale)
         let rotation = [canvas.scene.dimensions.size, 0]
         rotation = applyRotation(rotation, portalInfo.rotation)
         rotation = [rotation[0] * scale[0], rotation[1] * scale[1]]
@@ -48,7 +47,6 @@ function drawPortals(portals) {
 }
 
 function drawLights(lights) {
-    const regex = /([0-9]+\.?[0-9]*)[^(]? /g
     let numericalLights = []
     for(let lightInfo of lights) {
         let light = convertVectorIntoArray(lightInfo.position, regex)
@@ -60,17 +58,36 @@ function drawLights(lights) {
                 color: colorLight, contrast: 1}})
 
     }
-    console.log(numericalLights)
     canvas.scene.createEmbeddedDocuments("AmbientLight", numericalLights)
+}
+
+function drawPaths(paths) {
+    let numericalPaths = []
+    for(let pathInfo of paths) {
+        let pathPosition = convertVectorIntoArray(pathInfo.position, regex)
+        let initialCoordinates = [...pathPosition]
+        let path = convertVectorIntoArray(pathInfo.edit_points, regex)
+        for(let i=0; i<path.length-1;i+=2) {
+            numericalPaths.push({c: [initialCoordinates[0] + path[i], initialCoordinates[1] + path[i+1], pathPosition[0], pathPosition[1]]})
+            pathPosition[0] = initialCoordinates[0] + path[i]
+            pathPosition[1] = initialCoordinates[1] + path[i+1]
+        }
+        if(pathInfo.loop) {
+            numericalPaths.push({c: [initialCoordinates[0], initialCoordinates[1], pathPosition[0], pathPosition[1]]})
+        }
+    }
+    canvas.scene.createEmbeddedDocuments("Wall", numericalPaths)
 }
 
 function drawData(json) {
     const walls = json["world"]["levels"]["0"]["walls"]
     const portals = json["world"]["levels"]["0"]["portals"]
     const lights = json["world"]["levels"]["0"]["lights"]
-    // drawWalls(walls)
-    // drawPortals(portals)
+    const paths = json["world"]["levels"]["0"]["paths"]
+    drawWalls(walls)
+    drawPortals(portals)
     drawLights(lights)
+    // drawPaths(paths)
 }
 
 async function drawScene() {
