@@ -78,16 +78,19 @@ function drawLights(lights) {
 function drawPaths(paths) {
     let numericalPaths = []
     for (let pathInfo of paths) {
-        let pathPosition = convertVectorIntoArray(pathInfo.position, regex)
-        let initialCoordinates = [...pathPosition]
-        let path = convertVectorIntoArray(pathInfo.edit_points, regex)
-        for (let i = 0; i < path.length - 1; i += 2) {
-            numericalPaths.push({c: [initialCoordinates[0] + path[i], initialCoordinates[1] + path[i + 1], pathPosition[0], pathPosition[1]]})
-            pathPosition[0] = initialCoordinates[0] + path[i]
-            pathPosition[1] = initialCoordinates[1] + path[i + 1]
-        }
-        if (pathInfo.loop) {
-            numericalPaths.push({c: [initialCoordinates[0], initialCoordinates[1], pathPosition[0], pathPosition[1]]})
+        console.log(pathInfo)
+        if(pathInfo.block_light) {
+            let pathPosition = convertVectorIntoArray(pathInfo.position, regex)
+            let initialCoordinates = [...pathPosition]
+            let path = convertVectorIntoArray(pathInfo.edit_points, regex)
+            for (let i = 0; i < path.length - 1; i += 2) {
+                numericalPaths.push({c: [initialCoordinates[0] + path[i], initialCoordinates[1] + path[i + 1], pathPosition[0], pathPosition[1]]})
+                pathPosition[0] = initialCoordinates[0] + path[i]
+                pathPosition[1] = initialCoordinates[1] + path[i + 1]
+            }
+            if (pathInfo.loop) {
+                numericalPaths.push({c: [initialCoordinates[0], initialCoordinates[1], pathPosition[0], pathPosition[1]]})
+            }
         }
     }
     canvas.scene.createEmbeddedDocuments("Wall", numericalPaths)
@@ -101,7 +104,7 @@ function drawData(json) {
     drawWalls(walls)
     drawPortals(portals)
     drawLights(lights)
-    // drawPaths(paths)
+    drawPaths(paths)
 }
 
 async function drawScene() {
