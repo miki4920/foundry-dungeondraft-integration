@@ -49,35 +49,38 @@ function drawPortals(portals) {
     canvas.scene.createEmbeddedDocuments("Wall", numericalPortals)
 }
 
-function drawLights(lights, nightTime) {
+function drawLights(lights, day) {
     let numericalLights = []
-	if (nightTime) {
-		return;
+	if (day) {
+        canvas.scene.update({globalLight: true})
 	}
-    for (let lightInfo of lights) {
-        let light = convertVectorIntoArray(lightInfo.position, regex)
-        let dimLight = lightInfo.range * canvas.scene.dimensions.distance
-        let brightLight = dimLight * (lightInfo.intensity / 3)
-        let colorLight = "#" + lightInfo.color.substring(2, lightInfo.color.length)
-		let lightConfig = {
-			dim: dimLight,
-			bright: brightLight,
-			color: colorLight,
-			alpha: 0,
-			contrast: 0,
-			gradual: true,
-			luminosity: 0,
-			saturation: 0,
-			shadows: 0,
-		}
-        numericalLights.push({
-            x: light[0], y: light[1],
-            config: lightConfig
-        })
+    else {
+        for (let lightInfo of lights) {
+            let light = convertVectorIntoArray(lightInfo.position, regex)
+            let dimLight = lightInfo.range * canvas.scene.dimensions.distance
+            let brightLight = dimLight * (lightInfo.intensity / 3)
+            let colorLight = "#" + lightInfo.color.substring(2, lightInfo.color.length)
+            let lightConfig = {
+                dim: dimLight,
+                bright: brightLight,
+                color: colorLight,
+                alpha: 0,
+                contrast: 0,
+                gradual: true,
+                luminosity: 0,
+                saturation: 0,
+                shadows: 0,
+            }
+            numericalLights.push({
+                x: light[0], y: light[1],
+                config: lightConfig
+            })
 
+        }
+        canvas.scene.createEmbeddedDocuments("AmbientLight", numericalLights)
+        canvas.scene.update({globalLight: false})
     }
-    canvas.scene.createEmbeddedDocuments("AmbientLight", numericalLights)
-    canvas.scene.update({darkness: +nightTime})
+
 }
 
 function drawPaths(paths) {
@@ -100,14 +103,14 @@ function drawPaths(paths) {
     canvas.scene.createEmbeddedDocuments("Wall", numericalPaths)
 }
 
-function drawData(json, nightTime = false) {
+function drawData(json, day) {
     const walls = json["world"]["levels"]["0"]["walls"]
     const portals = json["world"]["levels"]["0"]["portals"]
     const lights = json["world"]["levels"]["0"]["lights"]
     const paths = json["world"]["levels"]["0"]["paths"]
     drawWalls(walls)
     drawPortals(portals)
-    drawLights(lights, nightTime)
+    drawLights(lights, day)
     drawPaths(paths)
 }
 
@@ -116,15 +119,15 @@ async function drawScene() {
         content: await renderTemplate("modules/foundryvtt-dungeondraft-integration/templates/dialogue.html",),
         buttons: {
             one: {
-                label: "Dark Map", callback: () => {
+                label: "Day", callback: () => {
                     const results = document.getElementById("dungeondraftFile").files[0]
-                    results.text().then((text) => drawData(JSON.parse(text), false))
+                    results.text().then((text) => drawData(JSON.parse(text), true))
                 }
             },
             two: {
-                label: "Light Map", callback: () => {
+                label: "Night", callback: () => {
                     const results = document.getElementById("dungeondraftFile").files[0]
-                    results.text().then((text) => drawData(JSON.parse(text), true))
+                    results.text().then((text) => drawData(JSON.parse(text), false))
                 }
             }
         }
