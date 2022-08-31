@@ -51,37 +51,25 @@ function drawPortals(portals) {
 
 function drawLights(lights, nightTime) {
     let numericalLights = []
-    let lightConfig;
+	if (nightTime) {
+		return;
+	}
     for (let lightInfo of lights) {
         let light = convertVectorIntoArray(lightInfo.position, regex)
         let dimLight = lightInfo.range * canvas.scene.dimensions.distance
         let brightLight = dimLight * (lightInfo.intensity / 3)
         let colorLight = "#" + lightInfo.color.substring(2, lightInfo.color.length)
-        if (nightTime) {
-            lightConfig = {
-                dim: dimLight,
-                bright: brightLight,
-                color: colorLight,
-                alpha: 0.25,
-                contrast: 0,
-                gradual: true,
-                luminosity: 0.5,
-                saturation: 0.25,
-                shadows: 0.15,
-            }
-        } else {
-            lightConfig = {
-                dim: dimLight,
-                bright: brightLight,
-                color: colorLight,
-                alpha: 0,
-                contrast: 0,
-                gradual: true,
-                luminosity: 0,
-                saturation: 0,
-                shadows: 0,
-            }
-        }
+		let lightConfig = {
+			dim: dimLight,
+			bright: brightLight,
+			color: colorLight,
+			alpha: 0,
+			contrast: 0,
+			gradual: true,
+			luminosity: 0,
+			saturation: 0,
+			shadows: 0,
+		}
         numericalLights.push({
             x: light[0], y: light[1],
             config: lightConfig
